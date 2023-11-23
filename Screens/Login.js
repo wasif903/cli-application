@@ -1,13 +1,41 @@
+import { useState } from "react";
 import { Text, View, Image, TouchableOpacity } from "react-native";
 import { TextInput } from 'react-native';
+import { useLoginMutation } from "../Redux/reducers/UserSlice";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 
 function Login({ navigation }) {
+
+
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+
+    const [login] = useLoginMutation();
+
+    const onLoginHandler = async () => {
+        try {
+            const res = await login({ email, password });
+            if (!res.error) {
+                alert("Login success");
+                await AsyncStorage.setItem("userdata", JSON.stringify(res.data));
+                navigation.navigate("Home");
+            } else {
+                alert("Login failed")
+                console.log(res.error)
+            }
+
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+
     return (
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', width: "100%" }}>
             <Image
                 source={require("../assets/logo-color.png")}
-                style={{ width: "50%", height: 35, marginBottom: 50 }}
+                style={{ width: "55%", height: 43, marginBottom: 50 }}
                 resizeMode="cover"
             />
 
@@ -30,6 +58,8 @@ function Login({ navigation }) {
                     borderRadius: 12,
                     padding: 15
                 }}
+                onChangeText={(e) => setEmail(e)}
+                value={email}
                 placeholder="example@gmail.com"
             />
 
@@ -55,13 +85,15 @@ function Login({ navigation }) {
                     padding: 15,
 
                 }}
+                onChangeText={(e) => setPassword(e)}
+                value={password}
                 placeholder="............."
             />
 
 
             <TouchableOpacity
-                onPress={() => navigation.navigate("Home")}
-
+                // onPress={() => navigation.navigate("Home")}
+                onPress={onLoginHandler}
                 style={{
                     marginTop: 40,
                     backgroundColor: "#BD0606",
@@ -82,7 +114,7 @@ function Login({ navigation }) {
                 color: "grey"
             }}
 
-                onPress={() => navigation.navigate("Signup")}
+                onPress={onLoginHandler}
             >
                 Don't Have An Account ? <Text style={{
                     color: "#BD0606"

@@ -1,8 +1,46 @@
 import { SafeAreaView, Text, View, Image, TouchableOpacity } from "react-native";
 import BottomTab from "../Components/BottomTab";
+import { useEffect, useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 
 function Home({ navigation }) {
+
+    const [userData, setUserData] = useState({});
+
+    const getUserData = async () => {
+        try {
+            const userData = await AsyncStorage.getItem("userdata");
+            if (userData) {
+                try {
+                    const data = JSON.parse(userData);
+                    setUserData(data);
+                } catch (parseError) {
+                    console.log("Error parsing user data:", parseError);
+                }
+            } else {
+                console.log("User data not found");
+            }
+        } catch (error) {
+            console.log("Unable to get user data");
+        }
+    };
+    useEffect(() => {
+        getUserData();
+    }, []);
+
+
+    const onLogoutHandler = async () => {
+        try {
+            await AsyncStorage.clear();
+            navigation.navigate("Login");
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    console.log(userData)
+
     return (
         <SafeAreaView style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: "white" }}>
             <View style={{
@@ -26,7 +64,7 @@ function Home({ navigation }) {
                             fontWeight: "600",
                             fontSize: 22,
                             color: "gray"
-                        }}>Muhammad Osama</Text>
+                        }}>{userData?.user?.username}</Text>
                 </View>
 
                 <Image
@@ -55,12 +93,14 @@ function Home({ navigation }) {
 
                 <Image
                     source={require("../assets/emergengyCall.png")}
-                    style={{ width: "85%", height: 300 }}
+                    style={{ width: "80%", height: 300 }}
                     resizeMode="cover"
                 />
 
-                <TouchableOpacity>
-
+                <TouchableOpacity onPress={onLogoutHandler} style={{marginTop:40, backgroundColor:"#BD0606", paddingTop:10, paddingBottom:10, paddingStart:15, paddingEnd:15, borderRadius:20}}>
+                    <Text style={{color:"white", fontSize:18}}>
+                        Logout
+                    </Text>
                 </TouchableOpacity>
 
             </View>
